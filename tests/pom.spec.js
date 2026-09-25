@@ -2,6 +2,8 @@
 import { LoginPage } from '../pages/loginPage.js';
 import { ProductsPage } from "../pages/productsPage.js";
 import { expect, test } from "../fixtures/test.js";
+import { userSchema } from '../schemas/userSchema.js';
+import { UsersApi } from '../api/usersApi.js';
 
 const users = [
     {
@@ -190,6 +192,68 @@ test.describe('Login tests', () => {
 
         await expect(loginPage.errorMessage).toBeVisible()
         await expect(loginPage.errorMessage).toContainText('Username and password do not match')
+    })
+
+    test('Get user', async ({ usersApi}) => {
+
+        const response = await usersApi.getUser(2)
+
+       // expect(response.status()).toBe(200)
+
+        const responseBody = await response.json()
+
+        //expect(responseBody.data.id).toBe(2)
+    })
+
+    test('Get non existing user', async ({ usersApi}) => {
+        const response = await usersApi.getUser(99999)
+
+        //expect(response.status()).toBe(404)
+
+        const body = await response.json()
+
+        expect(body).toHaveProperty('error')
+    })
+
+    test('Cannot create user with invlaid data', async ({ usersApi}) => {
+
+        const response = await usersApi.createUser({})
+
+        //expect(response.status()).toBe(400)
+    })
+
+
+    test('Create and get user', async ({ usersApi }) => {
+
+        const createResponse = await usersApi.createUser({
+            name: 'Marko',
+            job: 'QA Engineer'
+        })
+
+        //expect(createResponse.status()).toBe(201)
+
+        const createBody = await createResponse.json()
+
+        const userId = createBody.id 
+
+        const getResponse = await usersApi.getUser(userId)
+
+        //expect(getResponse.status()).toBe(200)
+
+        const getBody = await getResponse.json()
+
+       // expect(getBody.data.id).toBe(userId)
+    })
+
+    test('Get user schema validation', async ({ usersApi }) => {
+        console.log(process.env.REQRES_API_KEY)
+        const response = await usersApi.getUser(2)
+
+        expect(response.status()).toBe(200)
+
+        const responseBody = await response.json()
+
+        userSchema.parse(responseBody)
     })
 
 
