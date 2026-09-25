@@ -32,6 +32,15 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test
 
+      - name: Check test artifacts
+        if: always()
+        run: |
+          echo "Playwright report:"
+          ls -la playwright-report || true
+ 
+          echo "Test results:"
+          ls -la test-results || true
+
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
